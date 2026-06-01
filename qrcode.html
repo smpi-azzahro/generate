@@ -103,12 +103,19 @@
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">2. Upload Logo Sekolah:</label>
                         <div class="flex items-center justify-center w-full">
-                            <label for="fileInput" class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-200 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-all">
-                                <div class="flex flex-col items-center justify-center pt-2 pb-2">
+                            <label for="fileInput" id="dropzoneLabel" class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-200 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-all p-4">
+                                <div id="uploadPrompt" class="flex flex-col items-center justify-center pt-2 pb-2">
                                     <i data-lucide="upload-cloud" class="w-8 h-8 text-emerald-deep mb-1"></i>
                                     <p class="text-xs text-gray-500"><span class="font-semibold">Klik untuk upload</span> atau drag gambar ke sini</p>
                                 </div>
-                                <input type="file" id="fileInput" accept="image/*" class="hidden">
+                                <div id="fileSelectedInfo" class="hidden flex items-center gap-3 text-emerald-deep bg-emerald-soft border border-emerald-medium/20 px-4 py-2 rounded-xl max-w-full">
+                                    <i data-lucide="image" class="w-5 h-5 flex-shrink-0"></i>
+                                    <span id="fileNameDisplay" class="text-xs font-semibold truncate max-w-[200px] sm:max-w-xs">Nama_file.png</span>
+                                    <button type="button" onclick="hapusFileTerpilih(event)" class="text-red-500 hover:text-red-700 transition-colors ml-1">
+                                        <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                                <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="cekStatusFile()">
                             </label>
                         </div>
                     </div>
@@ -177,6 +184,16 @@
                         </p>
                     </div>
 
+                    <div id="processingPreview" class="hidden flex flex-col items-center justify-center text-center p-6 flex-1 animate-pulse">
+                        <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4 border-2 border-dashed border-gold-accent animate-spin">
+                            <i data-lucide="refresh-cw" class="w-6 h-6 text-gold-accent"></i>
+                        </div>
+                        <p class="text-gold-accent text-sm font-semibold tracking-wider">
+                            Memproses QR Code...
+                        </p>
+                        <p class="text-emerald-light/75 text-xs mt-1">Sedikit lagi sistem selesai meracik.</p>
+                    </div>
+
                     <div id="qrOutputWrapper" class="hidden w-full text-center space-y-6">
                         <div class="flex justify-center items-center">
                             <div id="layoutContainer" class="qr-container-pure">
@@ -217,19 +234,58 @@
 
         let urlApiAktif = "";
 
+        // Fungsi mengecek dan merubah tampilan ketika file dipilih
+        function cekStatusFile() {
+            const fileInput = document.getElementById('fileInput');
+            const uploadPrompt = document.getElementById('uploadPrompt');
+            const fileSelectedInfo = document.getElementById('fileSelectedInfo');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+            const dropzoneLabel = document.getElementById('dropzoneLabel');
+
+            if (fileInput.files.length > 0) {
+                uploadPrompt.classList.add('hidden');
+                fileSelectedInfo.classList.remove('hidden');
+                fileNameDisplay.innerText = fileInput.files[0].name;
+                dropzoneLabel.classList.remove('hover:bg-gray-100');
+                dropzoneLabel.classList.add('bg-emerald-soft/30', 'border-emerald-medium/40');
+            } else {
+                uploadPrompt.classList.remove('hidden');
+                fileSelectedInfo.classList.add('hidden');
+                dropzoneLabel.classList.add('hover:bg-gray-100');
+                dropzoneLabel.classList.remove('bg-emerald-soft/30', 'border-emerald-medium/40');
+            }
+            lucide.createIcons();
+        }
+
+        // Fungsi menghapus file terpilih saat tombol 'X' ditekan
+        function hapusFileTerpilih(event) {
+            event.preventDefault(); // Mencegah pemicuan klik pada dropzone label
+            document.getElementById('fileInput').value = "";
+            cekStatusFile();
+        }
+
         function jalankanSistem() {
             const fileInput = document.getElementById('fileInput');
             const urlInput = document.getElementById('urlInput').value;
             const btn = document.getElementById('btnGenerate');
             const loading = document.getElementById('loading');
+            
+            const loadingPreview = document.getElementById('loadingPreview');
+            const processingPreview = document.getElementById('processingPreview');
+            const qrOutputWrapper = document.getElementById('qrOutputWrapper');
 
             if (!urlInput) {
                 alert("Harap masukkan Link Tujuan terlebih dahulu!");
                 return;
             }
 
+            // Aktifkan Efek Loading pada Tombol & Panel Pratinjau
             btn.disabled = true;
             loading.classList.remove('hidden');
+            
+            loadingPreview.classList.add('hidden');
+            qrOutputWrapper.classList.add('hidden');
+            processingPreview.classList.remove('hidden');
 
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
@@ -333,6 +389,8 @@
             previewImg.src = apiUrl;
             document.getElementById('downloadBtn').href = apiUrl;
             
+            // Sembunyikan spinner loading dan munculkan wrapper hasil pratinjau
+            document.getElementById('processingPreview').classList.add('hidden');
             document.getElementById('loadingPreview').classList.add('hidden');
             document.getElementById('qrOutputWrapper').classList.remove('hidden');
             
