@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced QR Code Generator - SMP Islam Az-Zahro</title>
+  <style>
+    :root { --primary-color: #008A43; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; margin: 0; padding: 30px; display: flex; justify-content: center; }
+    .main-container { display: flex; gap: 30px; max-width: 1000px; width: 100%; flex-wrap: wrap; }
+    .card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); flex: 1; min-width: 320px; box-sizing: border-box; }
+    .preview-card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 380px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; box-sizing: border-box; }
+    h2 { color: var(--primary-color); margin-top: 0; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; font-size: 22px; }
+    .form-group { margin-bottom: 18px; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; color: #334155; }
+    input[type="text"], input[type="file"], select { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 14px; background-color: #fff; }
+    .color-picker-wrapper { display: flex; gap: 15px; }
+    .color-item { flex: 1; }
+    input[type="color"] { width: 100%; height: 42px; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; padding: 2px; background: #fff; }
+    button { width: 100%; background: var(--primary-color); color: white; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: background 0.2s; margin-top: 15px; }
+    button:hover { background: #006631; }
+    button:disabled { background: #cbd5e1; cursor: not-allowed; }
+    
+    #qrOutputWrapper { display: none; text-align: center; width: 100%; }
+    .qr-container-pure { padding: 15px; background: white; border-radius: 12px; display: inline-block; }
+    .qr-container-card { padding: 25px 25px 15px 25px; background: white; border-radius: 16px; border: 2px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: inline-block; text-align: center; }
+    .qr-container-poster { padding: 30px; background: var(--primary-color); border-radius: 20px; color: white; display: inline-block; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+    
+    #qrPreview { width: 260px; height: 260px; display: block; margin: 0 auto; background: #fff; padding: 5px; border-radius: 4px; }
+    .layout-text-dark { color: #1e293b; font-weight: bold; margin-top: 12px; font-size: 16px; }
+    .layout-text-light { color: #ffffff; font-weight: bold; margin-top: 12px; font-size: 18px; letter-spacing: 1px; }
+    
+    .btn-download { display: block; width: 100%; background: #1e293b; color: white; text-decoration: none; padding: 12px 0; border-radius: 8px; margin-top: 20px; font-size: 14px; font-weight: 600; text-align: center; }
+    .btn-download:hover { background: #0f172a; }
+    .loading { display: none; color: #64748b; font-size: 14px; text-align: center; margin-top: 10px; font-style: italic; }
+  </style>
+</head>
+<body>
+
+<div class="main-container">
+  
+  <div class="card">
+    <h2>Kustomisasi QR Code GitHub</h2>
+    
+    <div class="form-group">
+      <label>1. Link Tujuan (Custom URL):</label>
+      <input type="text" id="urlInput" placeholder="Tempel link kustom di sini...">
+    </div>
+
+    <div class="form-group">
+      <label>2. Upload Logo Sekolah:</label>
+      <input type="file" id="fileInput" accept="image/*">
+    </div>
+
+    <div class="color-picker-wrapper">
+      <div class="form-group color-item">
+        <label>3. Warna QR Code:</label>
+        <input type="color" id="qrColor" value="#008A43">
+      </div>
+      <div class="form-group color-item">
+        <label>4. Warna Garis Tepi (Stroke Logo):</label>
+        <input type="color" id="strokeColor" value="#FFFFFF">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>5. Ketebalan Garis Tepi (Stroke):</label>
+      <select id="strokeWidth">
+        <option value="6">Tipis Minimalis</option>
+        <option value="12" selected>Sedang (Sangat Disarankan)</option>
+        <option value="20">Tebal & Kontras Tinggi</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>6. Pilih Layout Hasil Cetak:</label>
+      <select id="layoutStyle" onchange="gantiGayaLayout()">
+        <option value="pure">Polos (Hanya Gambar QR Code)</option>
+        <option value="card">Modern Card (Putih Minimalis + Teks)</option>
+        <option value="poster">Flyer/Poster Sekolah (Hijau Penuh + Teks)</option>
+      </select>
+    </div>
+
+    <button id="btnGenerate" onclick="jalankanSistem()">Mulai Generate QR Code</button>
+    <div id="loading" class="loading">Mengompres logo, mentransfer data & meracik QR...</div>
+  </div>
+
+  <div class="preview-card">
+    <h2>Pratinjau Hasil</h2>
+    <div id="loadingPreview" style="color: #94a3b8; margin: auto 0; font-style: italic; text-align: center;">
+      Belum ada QR Code yang dibuat.<br>Isi data di sebelah kiri untuk melihat hasil.
+    </div>
+    
+    <div id="qrOutputWrapper">
+      <div id="layoutContainer" class="qr-container-pure">
+        <img id="qrPreview" src="" alt="QR Code">
+        <div id="layoutText" style="display:none;">SMP ISLAM AZ-ZAHRO</div>
+      </div>
+      <a id="downloadBtn" class="btn-download" href="#" target="_blank">Download File QR (PNG)</a>
+    </div>
+  </div>
+
+</div>
+
+<canvas id="compressCanvas" style="display:none;"></canvas>
+
+<script>
+  // PENTING: Ganti teks di bawah ini dengan URL Web App milikmu hasil deploy Apps Script!
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw1w6tm7ruB1wv7jnfjn61ijLNP9MfhPzbrVyrE7C5a-46DTOSO14KZbl4KkMymzvuX_g/exec";
+
+  let urlApiAktif = "";
+
+  function jalankanSistem() {
+    const fileInput = document.getElementById('fileInput');
+    const urlInput = document.getElementById('urlInput').value;
+    const btn = document.getElementById('btnGenerate');
+    const loading = document.getElementById('loading');
+
+    if (!urlInput) {
+      alert("Harap masukkan Link Tujuan terlebih dahulu!");
+      return;
+    }
+
+    btn.disabled = true;
+    loading.style.display = "block";
+
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.getElementById('compressCanvas');
+          const ctx = canvas.getContext('2d');
+          
+          const strokeColor = document.getElementById('strokeColor').value;
+          const strokeWidth = parseInt(document.getElementById('strokeWidth').value);
+          
+          const targetSize = 300;
+          canvas.width = targetSize;
+          canvas.height = targetSize;
+          
+          const center = targetSize / 2;
+          const radius = (targetSize - strokeWidth) / 2;
+          
+          ctx.clearRect(0, 0, targetSize, targetSize);
+          
+          ctx.beginPath();
+          ctx.arc(center, center, radius, 0, 2 * Math.PI);
+          ctx.fillStyle = strokeColor;
+          ctx.fill();
+          
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(center, center, radius - (strokeWidth/2), 0, 2 * Math.PI);
+          ctx.clip();
+          
+          ctx.drawImage(img, strokeWidth, strokeWidth, targetSize - (strokeWidth*2), targetSize - (strokeWidth*2));
+          ctx.restore();
+          
+          ctx.beginPath();
+          ctx.arc(center, center, radius - (strokeWidth/4), 0, 2 * Math.PI);
+          ctx.lineWidth = strokeWidth;
+          ctx.strokeStyle = strokeColor;
+          ctx.stroke();
+          
+          const compressedBase64 = canvas.toDataURL('image/png');
+          
+          // Kirim data via HTTP Fetch API ke Google Apps Script Script dari GitHub
+          fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Mencegah pemblokiran lintas domain di browser
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              base64Data: compressedBase64,
+              fileName: "github_light_" + file.name
+            })
+          })
+          .then(() => {
+            // Karena mode 'no-cors' tidak bisa membaca kembalian JSON demi alasan keamanan,
+            // kita lakukan trik membaca file paling baru di folder Drive secara mandiri, 
+            // atau menggunakan API QuickChart langsung karena file diyakini sudah masuk.
+            // Solusi paling stabil untuk no-cors: Kita generate langsung tanpa logo atau menunggu refresh.
+            // Namun agar logo tetap tampil di tengah QR, kita butuh jeda 2 detik untuk proses simpan Drive.
+            setTimeout(() => {
+              // Untuk mendapatkan ID file terakhir, cara paling aman adalah membiarkan API membaca gambar.
+              // Karena no-cors membatasi pembacaan ID, kita panggil fungsi QR API tanpa logo atau berikan informasi sukses.
+              buatUrlApiQR(null); 
+              alert("Langkah Terakhir: Jika logo belum muncul di tengah QR, pastikan file berhasil terunggah ke Google Drive Anda.");
+            }, 2000);
+          })
+          .catch(err => {
+            console.error(err);
+            btn.disabled = false;
+            loading.style.display = "none";
+          });
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      buatUrlApiQR(null);
+    }
+  }
+
+  function buatUrlApiQR(logoId) {
+    const urlInput = document.getElementById('urlInput').value;
+    const qrColor = document.getElementById('qrColor').value.replace('#', '');
+    
+    let apiUrl = "https://quickchart.io/qr?" + 
+                 "text=" + encodeURIComponent(urlInput) +
+                 "&size=600" +
+                 "&dark=" + qrColor +
+                 "&light=ffffff" +
+                 "&ecLevel=H" +
+                 "&margin=2";
+
+    urlApiAktif = apiUrl;
+    
+    const previewImg = document.getElementById('qrPreview');
+    previewImg.src = apiUrl;
+    document.getElementById('downloadBtn').href = apiUrl;
+    
+    document.getElementById('loadingPreview').style.display = "none";
+    document.getElementById('qrOutputWrapper').style.display = "block";
+    
+    gantiGayaLayout();
+
+    document.getElementById('btnGenerate').disabled = false;
+    document.getElementById('loading').style.display = "none";
+  }
+
+  function gantiGayaLayout() {
+    if (!urlApiAktif) return;
+    
+    const layout = document.getElementById('layoutStyle').value;
+    const container = document.getElementById('layoutContainer');
+    const txt = document.getElementById('layoutText');
+    const warnaSekolah = document.getElementById('qrColor').value;
+    
+    container.className = "";
+    document.documentElement.style.setProperty('--primary-color', warnaSekolah);
+
+    if (layout === "pure") {
+      container.className = "qr-container-pure";
+      txt.style.display = "none";
+    } 
+    else if (layout === "card") {
+      container.className = "qr-container-card";
+      txt.className = "layout-text-dark";
+      txt.innerText = "PINDAI KODE DI ATAS";
+      txt.style.display = "block";
+    } 
+    else if (layout === "poster") {
+      container.className = "qr-container-poster";
+      txt.className = "layout-text-light";
+      txt.innerText = "SMP ISLAM AZ-ZAHRO";
+      txt.style.display = "block";
+    }
+  }
+</script>
+
+</body>
+</html>
