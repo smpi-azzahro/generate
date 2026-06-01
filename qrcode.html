@@ -105,7 +105,7 @@
 <canvas id="compressCanvas" style="display:none;"></canvas>
 
 <script>
-  // PENTING: Ganti teks di bawah ini dengan URL Web App milikmu hasil deploy Apps Script!
+  // PENTING: Ganti teks di bawah ini dengan URL Web App milikmu yang BARU!
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw1w6tm7ruB1wv7jnfjn61ijLNP9MfhPzbrVyrE7C5a-46DTOSO14KZbl4KkMymzvuX_g/exec";
 
   let urlApiAktif = "";
@@ -167,31 +167,31 @@
           
           const compressedBase64 = canvas.toDataURL('image/png');
           
-          // Kirim data via HTTP Fetch API ke Google Apps Script Script dari GitHub
+          // MENGGUNAKAN TRIK URL-ENCODED FORM (Lolos dari blokir CORS GitHub)
+          // Mengubah data JSON menjadi string query parameter agar diizinkan dibaca kembali oleh browser
+          const dataPayload = "base64Data=" + encodeURIComponent(compressedBase64) + 
+                              "&fileName=" + encodeURIComponent("github_light_" + file.name);
+
           fetch(WEB_APP_URL, {
             method: 'POST',
-            mode: 'no-cors', // Mencegah pemblokiran lintas domain di browser
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              base64Data: compressedBase64,
-              fileName: "github_light_" + file.name
-            })
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: dataPayload
           })
-          .then(() => {
-            // Karena mode 'no-cors' tidak bisa membaca kembalian JSON demi alasan keamanan,
-            // kita lakukan trik membaca file paling baru di folder Drive secara mandiri, 
-            // atau menggunakan API QuickChart langsung karena file diyakini sudah masuk.
-            // Solusi paling stabil untuk no-cors: Kita generate langsung tanpa logo atau menunggu refresh.
-            // Namun agar logo tetap tampil di tengah QR, kita butuh jeda 2 detik untuk proses simpan Drive.
-            setTimeout(() => {
-              // Untuk mendapatkan ID file terakhir, cara paling aman adalah membiarkan API membaca gambar.
-              // Karena no-cors membatasi pembacaan ID, kita panggil fungsi QR API tanpa logo atau berikan informasi sukses.
-              buatUrlApiQR(null); 
-              alert("Langkah Terakhir: Jika logo belum muncul di tengah QR, pastikan file berhasil terunggah ke Google Drive Anda.");
-            }, 2000);
+          .then(res => res.json()) // Sekarang browser diizinkan membaca respons JSON kembalian Google!
+          .then(response => {
+            if (response.success && response.fileId) {
+              buatUrlApiQR(response.fileId); // ID berhasil didapat, panggil QR dengan Logo!
+            } else {
+              alert("Gagal memproses gambar di server Drive.");
+              buatUrlApiQR(null);
+            }
           })
           .catch(err => {
-            console.error(err);
+            console.error("Fetch Error:", err);
+            alert("Terjadi gangguan koneksi API.");
+            buatUrlApiQR(null);
+          })
+          .finally(() => {
             btn.disabled = false;
             loading.style.display = "none";
           });
@@ -215,6 +215,12 @@
                  "&light=ffffff" +
                  "&ecLevel=H" +
                  "&margin=2";
+
+    if (logoId) {
+      const urlDrive = "https://drive.google.com/uc?export=view&id=" + logoId;
+      apiUrl += "&centerImageUrl=" + encodeURIComponent(urlDrive) +
+                "&centerImageSize=0.24";
+    }
 
     urlApiAktif = apiUrl;
     
