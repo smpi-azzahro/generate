@@ -1,268 +1,337 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulir Surat Izin Guru Az-Zahro</title>
+    <title>Formulir Surat Izin Guru - SMP Islam Az-Zahro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            deep: '#0F5132',
+                            medium: '#146c43',
+                            light: '#d1e7dd',
+                            soft: '#f0fdf4'
+                        },
+                        gold: {
+                            accent: '#D4AF37',
+                            muted: '#c5a059',
+                            light: '#fbf7eb'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'Georgia', 'serif'],
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; padding: 15px; margin: 0; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #34495e; }
-        input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        .sig-container { border: 1px solid #ddd; background: #fcfcfc; border-radius: 6px; }
-        canvas { width: 100%; height: 150px; display: block; cursor: crosshair; }
-        .btn-row { display: flex; gap: 10px; margin-top: 20px; }
-        
-        button { flex: 1; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.3s; }
-        .btn-clear { background: #95a5a6; color: white; }
-        .btn-preview { background: #3498db; color: white; }
-        .btn-save { background: #27ae60; color: white; width: 100%; margin-top: 15px; }
-        .btn-wa { background: #25D366; color: white; width: 100%; margin-top: 15px; }
-        .btn-text { background: #128C7E; color: white; width: 100%; margin-top: 15px; }
-        button:active { transform: scale(0.98); }
-
-        #custom-alert {
-            display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center;
+        body { font-family: 'Inter', sans-serif; }
+        .font-serif-custom { font-family: 'Playfair Display', serif; }
+        .bg-islamic-pattern {
+            background-color: #0f5132;
+            background-image: radial-gradient(rgba(212, 175, 55, 0.1) 1px, transparent 0),
+                              radial-gradient(rgba(212, 175, 55, 0.1) 1px, transparent 0);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
         }
-        .alert-content {
-            background: white; padding: 30px; border-radius: 15px; text-align: center;
-            max-width: 320px; width: 80%; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-        }
-        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .alert-icon { font-size: 50px; color: #e74c3c; margin-bottom: 15px; }
-        .alert-text { color: #2c3e50; font-size: 16px; margin-bottom: 20px; line-height: 1.4; }
-        .btn-alert-ok { background: #3498db; color: white; border: none; padding: 10px 30px; border-radius: 20px; cursor: pointer; font-weight: bold; }
-
-        #preview-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); overflow-y: auto; }
-        .modal-body { display: flex; flex-direction: column; align-items: center; padding: 10px; }
-        .pdf-wrapper { background: white; box-shadow: 0 0 20px rgba(0,0,0,0.5); transform-origin: top center; margin-bottom: 20px; }
-
+        canvas { display: block; cursor: crosshair; }
+        /* Style cetak PDF agar tetap menggunakan font formal */
         #pdf-template { 
             background: white; padding: 15mm 20mm; font-family: 'Times New Roman', Times, serif; 
             line-height: 1.6; color: black; font-size: 12pt; width: 210mm; box-sizing: border-box; 
         }
-        .kop-surat img { width: 100%; display: block; margin-bottom: 10px; }
-        .cap { text-transform: capitalize; } 
-        .row-data { display: flex; margin-bottom: 5px; align-items: flex-start; }
-        .label-data { width: 130px; flex-shrink: 0; }
-        .titik-dua { padding: 0 8px; flex-shrink: 0; }
-        .ttd-section { margin-top: 30px; display: flex; flex-direction: column; align-items: flex-end; text-align: center; }
-        .ttd-box { width: 250px; }
-        .nama-bawah { font-weight: bold; border-bottom: 1.5px solid black; padding: 0 15px; min-width: 160px; text-transform: capitalize; display: inline-block; margin-top: 5px; }
-        .preview-footer { 
-            position: sticky; bottom: 0; width: 100%; max-width: 800px; background: #eee; 
-            padding: 15px; display: flex; flex-wrap: wrap; gap: 10px; box-sizing: border-box; border-radius: 8px 8px 0 0;
-        }
-        .preview-footer button { flex: 1 1 150px; margin-top: 0 !important; }
+        .cap { text-transform: capitalize; }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800 antialiased min-h-screen flex flex-col justify-between">
 
-<div id="custom-alert">
-    <div class="alert-content">
-        <div class="alert-icon">⚠️</div>
-        <div class="alert-text">Oops! Harap isi semua data dan tanda tangan Anda.</div>
-        <button class="btn-alert-ok" onclick="closeAlert()">Siap!</button>
-    </div>
-</div>
-
-<div class="container">
-    <div style="text-align: center; margin-bottom: 25px;">
-    <span style="font-size: 14px; font-weight: bold; color: #7f8c8d; display: block; margin-bottom: 5px;">FORM SURAT IZIN</span>
-    <span style="font-size: 24px; font-weight: 800; color: #2c3e50; display: block; letter-spacing: 1px;">GURU AZ-ZAHRO</span>
+    <div class="w-full bg-emerald-deep py-4 px-4 border-b border-emerald-medium/30 shadow-md">
+        <div class="max-w-xl mx-auto flex items-center space-x-3">
+            <img src="https://azzahrolocare.github.io/presensi-smp-smk-azzahro/logo-smp-azzahro.png" alt="Logo SMP Islam Az-Zahro" class="w-10 h-10 object-contain">
+            <div>
+                <span class="block text-white font-serif-custom text-sm font-bold tracking-wide">SMP ISLAM AZ-ZAHRO</span>
+                <span class="block text-gold-accent text-[10px] tracking-widest uppercase font-semibold">Portal Layanan Persuratan Digital</span>
+            </div>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Nama Lengkap</label>
-        <input type="text" id="nama" placeholder="Tulis Nama atau Inisial" list="daftar-guru" autocomplete="off" enterkeyhint="done">
-        <datalist id="daftar-guru"></datalist>
-    </div>
+    <main class="flex-grow p-4 md:py-10 flex items-center justify-center">
+        <div class="w-full max-w-xl bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
+            
+            <div class="bg-islamic-pattern p-6 text-center border-b border-gold-accent/20">
+                <span class="inline-block text-gold-accent text-xs font-bold tracking-widest uppercase bg-black/20 px-3 py-1 rounded-full mb-1">E-Services</span>
+                <h1 class="text-2xl font-serif-custom font-bold text-white">Formulir Surat Izin Guru</h1>
+                <div class="w-12 h-0.5 bg-gold-accent mx-auto mt-2 rounded-full"></div>
+            </div>
 
-    <div class="form-group">
-        <label>Guru Mapel</label>
-        <input type="text" id="mapel" placeholder="Contoh: Matematika" list="daftar-mapel" autocomplete="off" enterkeyhint="done">
-        <datalist id="daftar-mapel"></datalist>
-    </div>
-
-    <div class="form-group" style="display: flex; gap: 10px;">
-        <div style="flex: 1;"><label>Hari</label><input type="text" id="hari" placeholder="Otomatis" readonly></div>
-        <div style="flex: 2;"><label>Tanggal Izin</label><input type="date" id="tgl" onchange="updateHari()" enterkeyhint="done"></div>
-    </div>
-    <div class="form-group"><label>Keterangan:</label><input type="text" id="alasan" placeholder="Sebutkan keterangan..." enterkeyhint="done"></div>
-
-    <label>Tanda Tangan Digital</label>
-    <div class="sig-container"><canvas id="pad"></canvas></div>
-    <div class="btn-row">
-        <button class="btn-clear" onclick="pad.clear()">Hapus TTD</button>
-        <button class="btn-preview" onclick="showPreview()">Preview Surat</button>
-    </div>
-</div>
-
-<div id="preview-modal">
-    <div class="modal-body">
-        <div class="pdf-wrapper" id="zoom-wrapper">
-            <div id="pdf-template">
-                <div class="kop-surat"><img src="https://azzahrolocare.github.io/persuratan/Kop%20SMP%20dan%20SMK%20Az-Zahro.png"></div>
-                <div style="text-align: right; margin-bottom: 15px;">Bondowoso, <span id="outTglSkrg"></span></div>
-                <p>Perihal: <b>Surat Pemberitahuan Ketidakhadiran</b></p>
-                <p>Kepada Yth.<br><b>Pengasuh Pondok Pesantren Salafiyah Syafi'iyah Az-Zahro</b><br>
-                <b>Kepala Sekolah SMP Islam Az-Zahro dan SMK Az-Zahro</b><br>di Tempat</p>
-                <p><i>Assalamualaikum warahmatullahi wabarakatuh.</i></p>
-                <p>Dengan hormat, saya yang bertanda tangan di bawah ini:</p>
+            <div class="p-6 md:p-8 space-y-5">
                 
-                <div class="row-data"><div class="label-data">Nama</div><div class="titik-dua">:</div><span id="outNama" class="cap"></span></div>
-                <div class="row-data"><div class="label-data">Guru Mapel</div><div class="titik-dua">:</div><span id="outMapel" class="cap"></span></div>
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+                        <i data-lucide="user" class="w-3.5 h-3.5 text-emerald-medium"></i> Nama Lengkap
+                    </label>
+                    <input type="text" id="nama" placeholder="Tulis Nama atau Inisial" list="daftar-guru" autocomplete="off" enterkeyhint="done"
+                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-emerald-deep focus:bg-white text-sm transition-all shadow-sm">
+                    <datalist id="daftar-guru"></datalist>
+                </div>
 
-                <p>Dengan adanya surat ini saya memohon izin untuk tidak hadir di sekolah pada:</p>
-                <div class="row-data"><div class="label-data">Hari</div><div class="titik-dua">:</div><span id="outHari" class="cap"></span></div>
-                <div class="row-data"><div class="label-data">Tanggal</div><div class="titik-dua">:</div><span id="outTgl"></span></div>
-                <div class="row-data"><div class="label-data">Keterangan</div><div class="titik-dua">:</div><span id="outAlasan" class="cap"></span></div>
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+                        <i data-lucide="book-open" class="w-3.5 h-3.5 text-emerald-medium"></i> Guru Mapel
+                    </label>
+                    <input type="text" id="mapel" placeholder="Contoh: Matematika" list="daftar-mapel" autocomplete="off" enterkeyhint="done"
+                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-emerald-deep focus:bg-white text-sm transition-all shadow-sm">
+                    <datalist id="daftar-mapel"></datalist>
+                </div>
 
-                <p style="margin-top: 20px;">Demikian surat permohonan izin ini saya sampaikan.<br>Atas perhatiannya, saya ucapkan terima kasih.</p>
-                <p><i>Wa'alaikumsalam warahmatullaahi wabarakaatuh.</i></p>
-
-                <div class="ttd-section">
-                    <div class="ttd-box">
-                        <p style="margin-bottom: 0;">Hormat Saya,</p>
-                        <div style="height: 80px; display: flex; align-items: center; justify-content: center;">
-                            <img id="outTtd" style="max-width:160px; max-height:80px;">
-                        </div>
-                        <span class="nama-bawah" id="outNama2"></span>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="sm:col-span-1 space-y-1.5">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide">Hari</label>
+                        <input type="text" id="hari" placeholder="Otomatis" readonly
+                            class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-500 text-sm focus:outline-none font-medium text-center">
                     </div>
+                    <div class="sm:col-span-2 space-y-1.5">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+                            <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-medium"></i> Tanggal Izin
+                        </label>
+                        <input type="date" id="tgl" onchange="updateHari()" enterkeyhint="done"
+                            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-emerald-deep focus:bg-white text-sm transition-all shadow-sm">
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+                        <i data-lucide="file-text" class="w-3.5 h-3.5 text-emerald-medium"></i> Keterangan / Alasan
+                    </label>
+                    <input type="text" id="alasan" placeholder="Sebutkan alasan berhalangan..." enterkeyhint="done"
+                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-emerald-deep focus:bg-white text-sm transition-all shadow-sm">
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+                        <i data-lucide="pen-tool" class="w-3.5 h-3.5 text-emerald-medium"></i> Tanda Tangan Digital
+                    </label>
+                    <div class="border border-gray-200 bg-gray-50 rounded-2xl overflow-hidden p-1 shadow-inner relative">
+                        <canvas id="pad" class="w-full h-36 bg-white rounded-xl"></canvas>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <button class="py-3 px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl transition-colors text-sm flex items-center justify-center gap-2" onclick="pad.clear()">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i> Bersihkan TTD
+                    </button>
+                    <button class="py-3 px-4 bg-emerald-deep hover:bg-emerald-medium text-white font-bold rounded-xl transition-all transform hover:-translate-y-0.5 shadow-md text-sm flex items-center justify-center gap-2" onclick="showPreview()">
+                        <i data-lucide="eye" class="w-4 h-4 text-gold-accent"></i> Preview Surat
+                    </button>
                 </div>
             </div>
         </div>
-        
-        <div class="preview-footer">
-            <button class="btn-clear" onclick="closePreview()">BATAL</button>
-            <button class="btn-text" onclick="shareTextOnly()">BAGIKAN TEKS (WA)</button>
-            <button class="btn-wa" id="btnShare" onclick="shareToWhatsApp()">BAGIKAN GAMBAR (WA)</button>
-            <button class="btn-save" id="btnDownload" onclick="downloadPDF()">SIMPAN PDF</button>
+    </main>
+
+    <div id="custom-alert" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 text-center max-w-sm w-full shadow-2xl border border-gray-100 transform scale-100 transition-all duration-300">
+            <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
+                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-lg font-serif-custom font-bold text-gray-900 mb-2">Formulir Belum Lengkap</h3>
+            <p class="text-sm text-gray-500 leading-relaxed mb-6">Harap isi nama lengkap, tanggal izin, serta bubuhkan tanda tangan digital Anda terlebih dahulu.</p>
+            <button class="w-full py-3 bg-emerald-deep hover:bg-emerald-medium text-white font-bold rounded-xl shadow-md transition-colors text-sm" onclick="closeAlert()">
+                Siap, Saya Lengkapi
+            </button>
         </div>
     </div>
-</div>
 
-<script src="guru.js"></script>
+    <div id="preview-modal" class="hidden fixed inset-0 z-40 bg-black/80 overflow-y-auto">
+        <div class="min-h-screen flex flex-col items-center justify-between p-4 md:p-6">
+            
+            <div class="my-auto shadow-2xl bg-white overflow-hidden rounded shadow-black/50" id="zoom-wrapper">
+                <div id="pdf-template">
+                    <div class="border-b-2 border-black pb-2 mb-4">
+                        <img src="https://azzahrolocare.github.io/persuratan/Kop%20SMP%20dan%20SMK%20Az-Zahro.png" alt="Kop Surat Resmi" class="w-full block">
+                    </div>
+                    <div style="text-align: right; margin-bottom: 15px;">Bondowoso, <span id="outTglSkrg"></span></div>
+                    <p style="margin: 0 0 15px 0;">Perihal: <b>Surat Pemberitahuan Ketidakhadiran</b></p>
+                    <p style="margin-bottom: 15px;">Kepada Yth.<br><b>Pengasuh Pondok Pesantren Salafiyah Syafi'iyah Az-Zahro</b><br>
+                    <b>Kepala Sekolah SMP Islam Az-Zahro dan SMK Az-Zahro</b><br>di Tempat</p>
+                    <p style="margin-bottom: 15px;"><i>Assalamualaikum warahmatullahi wabarakatuh.</i></p>
+                    <p style="margin-bottom: 15px;">Dengan hormat, saya yang bertanda tangan di bawah ini:</p>
+                    
+                    <div style="display: flex; margin-bottom: 5px;"><div style="width: 130px;">Nama</div><div style="padding:0 8px;">:</div><span id="outNama" class="cap"></span></div>
+                    <div style="display: flex; margin-bottom: 15px;"><div style="width: 130px;">Guru Mapel</div><div style="padding:0 8px;">:</div><span id="outMapel" class="cap"></span></div>
 
-<script>
-    const canvas = document.getElementById('pad');
-    const pad = new SignaturePad(canvas);
+                    <p style="margin-bottom: 15px;">Dengan adanya surat ini saya memohon izin untuk tidak hadir di sekolah pada:</p>
+                    <div style="display: flex; margin-bottom: 5px;"><div style="width: 130px;">Hari</div><div style="padding:0 8px;">:</div><span id="outHari" class="cap"></span></div>
+                    <div style="display: flex; margin-bottom: 5px;"><div style="width: 130px;">Tanggal</div><div style="padding:0 8px;">:</div><span id="outTgl"></span></div>
+                    <div style="display: flex; margin-bottom: 15px;"><div style="width: 130px;">Keterangan</div><div style="padding:0 8px;">:</div><span id="outAlasan" class="cap"></span></div>
 
-    function inisialisasiAutosuggest() {
-        const listGuru = document.getElementById('daftar-guru');
-        if (typeof daftarNamaGuru !== 'undefined') {
-            daftarNamaGuru.forEach(nama => {
-                const opt = document.createElement('option');
-                opt.value = nama;
-                listGuru.appendChild(opt);
+                    <p style="margin-top: 20px; margin-bottom: 15px;">Demikian surat permohonan izin ini saya sampaikan.<br>Atas perhatiannya, saya ucapkan terima kasih.</p>
+                    <p style="margin-bottom: 25px;"><i>Wa'alaikumsalam warahmatullaahi wabarakaatuh.</i></p>
+
+                    <div style="margin-top: 30px; display: flex; flex-direction: column; align-items: flex-end; text-align: center;">
+                        <div style="width: 250px;">
+                            <p style="margin-bottom: 0;">Hormat Saya,</p>
+                            <div style="height: 80px; display: flex; align-items: center; justify-content: center;">
+                                <img id="outTtd" style="max-width:160px; max-height:80px;">
+                            </div>
+                            <span style="font-weight: bold; border-bottom: 1.5px solid black; padding: 0 15px; min-width: 160px; text-transform: capitalize; display: inline-block; margin-top: 5px;" id="outNama2"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="w-full max-w-3xl bg-gray-100 rounded-2xl p-4 grid grid-cols-2 md:grid-cols-5 gap-3 border border-gray-200 mt-4">
+                <button class="py-3 px-2 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-xl text-xs uppercase tracking-wide transition-colors" onclick="closePreview()">
+                    Batal
+                </button>
+                <button class="py-3 px-2 bg-emerald-deep hover:bg-emerald-medium text-white font-bold rounded-xl text-xs uppercase tracking-wide transition-colors flex items-center justify-center gap-1" onclick="shareTextOnly()">
+                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Teks WA
+                </button>
+                <button class="py-3 px-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl text-xs uppercase tracking-wide transition-colors col-span-1 flex items-center justify-center gap-1" id="btnShare" onclick="shareToWhatsApp()">
+                    <i data-lucide="image" class="w-3.5 h-3.5"></i> Gambar WA
+                </button>
+                <button class="py-3 px-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs uppercase tracking-wide transition-colors col-span-2 md:col-span-2 flex items-center justify-center gap-1" id="btnDownload" onclick="downloadPDF()">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i> Simpan PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="w-full bg-emerald-deep/5 border-t border-gray-200 py-3 text-center text-[11px] text-gray-400">
+        &copy; 2026 SMP Islam Az-Zahro. All Rights Reserved. • Integrated E-Permit System
+    </footer>
+
+    <script src="guru.js"></script>
+
+    <script>
+        // Init Lucide Icons Component Styling
+        lucide.createIcons();
+
+        const canvas = document.getElementById('pad');
+        const pad = new SignaturePad(canvas);
+
+        function inisialisasiAutosuggest() {
+            const listGuru = document.getElementById('daftar-guru');
+            if (typeof daftarNamaGuru !== 'undefined') {
+                daftarNamaGuru.forEach(nama => {
+                    const opt = document.createElement('option');
+                    opt.value = nama;
+                    listGuru.appendChild(opt);
+                });
+            }
+
+            const listMapel = document.getElementById('daftar-mapel');
+            if (typeof daftarMapel !== 'undefined') {
+                daftarMapel.forEach(mapel => {
+                    const opt = document.createElement('option');
+                    opt.value = mapel;
+                    listMapel.appendChild(opt);
+                });
+            }
+        }
+        window.addEventListener('DOMContentLoaded', inisialisasiAutosuggest);
+
+        function updateHari() {
+            const tglInput = document.getElementById('tgl').value;
+            const hariInput = document.getElementById('hari');
+            if (tglInput) {
+                const date = new Date(tglInput);
+                const daftarHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+                hariInput.value = daftarHari[date.getDay()];
+            } else {
+                hariInput.value = "";
+            }
+        }
+
+        function toTitleCase(str) {
+            return str.toLowerCase().split(' ').map(word => {
+                return (word.charAt(0).toUpperCase() + word.slice(1));
+            }).join(' ');
+        }
+
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') { this.blur(); }
             });
-        }
-
-        const listMapel = document.getElementById('daftar-mapel');
-        if (typeof daftarMapel !== 'undefined') {
-            daftarMapel.forEach(mapel => {
-                const opt = document.createElement('option');
-                opt.value = mapel;
-                listMapel.appendChild(opt);
-            });
-        }
-    }
-    window.addEventListener('DOMContentLoaded', inisialisasiAutosuggest);
-
-    function updateHari() {
-        const tglInput = document.getElementById('tgl').value;
-        const hariInput = document.getElementById('hari');
-        if (tglInput) {
-            const date = new Date(tglInput);
-            const daftarHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-            hariInput.value = daftarHari[date.getDay()];
-        } else {
-            hariInput.value = "";
-        }
-    }
-
-    function toTitleCase(str) {
-        return str.toLowerCase().split(' ').map(word => {
-            return (word.charAt(0).toUpperCase() + word.slice(1));
-        }).join(' ');
-    }
-
-    document.querySelectorAll('input').forEach(input => {
-        input.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') { this.blur(); }
         });
-    });
 
-    function resize() {
-        const ratio = Math.max(window.devicePixelRatio || 1, 1);
-        canvas.width = canvas.offsetWidth * ratio;
-        canvas.height = canvas.offsetHeight * ratio;
-        canvas.getContext("2d").scale(ratio, ratio);
-        pad.clear(); 
-    }
-    window.onresize = resize; resize();
-
-    function formatTanggal(d) {
-        if (!d) return "";
-        return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-    }
-
-    function showAlert() { document.getElementById('custom-alert').style.display = 'flex'; }
-    function closeAlert() { document.getElementById('custom-alert').style.display = 'none'; }
-
-    function showPreview() {
-        const nama = document.getElementById('nama').value;
-        const tgl = document.getElementById('tgl').value;
-        if (!nama || !tgl || pad.isEmpty()) { showAlert(); return; }
-
-        document.getElementById('outNama').textContent = nama;
-        document.getElementById('outNama2').textContent = nama; 
-        document.getElementById('outMapel').textContent = document.getElementById('mapel').value || "-";
-        
-        // Perbaikan: Hitung hari langsung saat preview untuk memastikan data tidak kosong
-        const dateObj = new Date(tgl);
-        const daftarHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-        document.getElementById('outHari').textContent = daftarHari[dateObj.getDay()];
-        
-        document.getElementById('outTgl').textContent = formatTanggal(tgl);
-        document.getElementById('outTglSkrg').textContent = formatTanggal(new Date());
-        document.getElementById('outAlasan').textContent = document.getElementById('alasan').value || "-";
-        document.getElementById('outTtd').src = pad.toDataURL();
-
-        document.getElementById('preview-modal').style.display = 'block';
-
-        const wrapper = document.getElementById('zoom-wrapper');
-        const scale = (window.innerWidth * 0.95) / 794;
-        wrapper.style.transform = scale < 1 ? `scale(${scale})` : `scale(1)`;
-    }
-
-    function closePreview() { document.getElementById('preview-modal').style.display = 'none'; }
-
-    function shareTextOnly() {
-        const nama = document.getElementById('nama').value;
-        const mapel = document.getElementById('mapel').value || "-";
-        
-        // Ambil hari langsung dari tanggal input
-        const tglValue = document.getElementById('tgl').value;
-        let hari = "-";
-        if(tglValue) {
-            const dateObj = new Date(tglValue);
-            const daftarHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-            hari = daftarHari[dateObj.getDay()];
+        function resize() {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext("2d").scale(ratio, ratio);
+            pad.clear(); 
         }
-        
-        const tgl = formatTanggal(tglValue);
-        const alasanRaw = document.getElementById('alasan').value || "-";
-        const alasan = toTitleCase(alasanRaw);
-        const tglSekarang = formatTanggal(new Date());
+        window.onresize = resize; resize();
 
-        const pesanTeks = 
+        function formatTanggal(d) {
+            if (!d) return "";
+            return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function showAlert() { 
+            document.getElementById('custom-alert').classList.remove('hidden'); 
+        }
+        function closeAlert() { 
+            document.getElementById('custom-alert').classList.add('hidden'); 
+        }
+
+        function showPreview() {
+            const nama = document.getElementById('nama').value;
+            const tgl = document.getElementById('tgl').value;
+            if (!nama || !tgl || pad.isEmpty()) { showAlert(); return; }
+
+            document.getElementById('outNama').textContent = nama;
+            document.getElementById('outNama2').textContent = nama; 
+            document.getElementById('outMapel').textContent = document.getElementById('mapel').value || "-";
+            
+            const dateObj = new Date(tgl);
+            const daftarHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+            document.getElementById('outHari').textContent = daftarHari[dateObj.getDay()];
+            
+            document.getElementById('outTgl').textContent = formatTanggal(tgl);
+            document.getElementById('outTglSkrg').textContent = formatTanggal(new Date());
+            document.getElementById('outAlasan').textContent = document.getElementById('alasan').value || "-";
+            document.getElementById('outTtd').src = pad.toDataURL();
+
+            document.getElementById('preview-modal').classList.remove('hidden');
+
+            const wrapper = document.getElementById('zoom-wrapper');
+            const scale = (window.innerWidth * 0.95) / 794;
+            wrapper.style.transform = scale < 1 ? `scale(${scale})` : `scale(1)`;
+        }
+
+        function closePreview() { 
+            document.getElementById('preview-modal').classList.add('hidden'); 
+        }
+
+        function shareTextOnly() {
+            const nama = document.getElementById('nama').value;
+            const mapel = document.getElementById('mapel').value || "-";
+            const tglValue = document.getElementById('tgl').value;
+            let hari = "-";
+            if(tglValue) {
+                const dateObj = new Date(tglValue);
+                const daftarHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+                hari = daftarHari[dateObj.getDay()];
+            }
+            
+            const tgl = formatTanggal(tglValue);
+            const alasanRaw = document.getElementById('alasan').value || "-";
+            const alasan = toTitleCase(alasanRaw);
+            const tglSekarang = formatTanggal(new Date());
+
+            const pesanTeks = 
 `*SURAT PEMBERITAHUAN KETIDAKHADIRAN*
 Bondowoso, ${tglSekarang}
 
@@ -291,130 +360,124 @@ Hormat Saya,
 
 _Dikirim otomatis via Sistem Persuratan Lembaga Az-Zahro_`;
 
-        const url = `https://wa.me/?text=${encodeURIComponent(pesanTeks)}`;
-        window.open(url, '_blank');
-    }
-
-    async function shareToWhatsApp() {
-        const btn = document.getElementById('btnShare');
-        const el = document.getElementById('pdf-template');
-        const wrapper = document.getElementById('zoom-wrapper');
-        
-        const nama = document.getElementById('nama').value;
-        const mapel = document.getElementById('mapel').value || "-";
-        
-        // Hitung hari langsung
-        const tglValue = document.getElementById('tgl').value;
-        let hari = "-";
-        if(tglValue) {
-            const dateObj = new Date(tglValue);
-            const daftarHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-            hari = daftarHari[dateObj.getDay()];
+            const url = `https://wa.me/?text=${encodeURIComponent(pesanTeks)}`;
+            window.open(url, '_blank');
         }
 
-        const tgl = formatTanggal(tglValue);
-        let alasanRaw = document.getElementById('alasan').value || "-";
-        const alasan = toTitleCase(alasanRaw);
-
-        const pesanTeks = `*SURAT IZIN GURU AZ-ZAHRO*\n\nNama: *${nama}*\nMapel: ${mapel}\nHari/Tgl: ${hari}, ${tgl}\nKeterangan: ${alasan}\n\n_Dikirim otomatis via Sistem Persuratan Lembaga Az-Zahro_`;
-
-        const currentTransform = wrapper.style.transform;
-        wrapper.style.transform = "scale(1)";
-        btn.disabled = true;
-        btn.innerText = "Memproses...";
-
-        try {
-            const opt = { margin: 0, filename: 'temp.pdf', image: { type: 'jpeg', quality: 0.95 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4' } };
-            const canvasImg = await html2pdf().set(opt).from(el).toCanvas().get('canvas');
+        async function shareToWhatsApp() {
+            const btn = document.getElementById('btnShare');
+            const el = document.getElementById('pdf-template');
+            const wrapper = document.getElementById('zoom-wrapper');
             
-            const blob = await new Promise(resolve => canvasImg.toBlob(resolve, 'image/png'));
-            const file = new File([blob], `Izin_${nama.replace(/\s+/g, '_')}.png`, { type: 'image/png' });
-
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({ files: [file], text: pesanTeks });
-            } else if (navigator.share) {
-                await navigator.share({ title: 'Surat Izin Guru', text: pesanTeks });
-            } else {
-                window.open(`https://wa.me/?text=${encodeURIComponent(pesanTeks)}`, '_blank');
+            const nama = document.getElementById('nama').value;
+            const mapel = document.getElementById('mapel').value || "-";
+            const tglValue = document.getElementById('tgl').value;
+            let hari = "-";
+            if(tglValue) {
+                const dateObj = new Date(tglValue);
+                const daftarHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+                hari = daftarHari[dateObj.getDay()];
             }
-        } catch (err) {
-            window.open(`https://wa.me/?text=${encodeURIComponent(pesanTeks)}`, '_blank');
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "BAGIKAN GAMBAR (WA)";
-            wrapper.style.transform = currentTransform;
-        }
-    }
 
-    async function downloadPDF() {
-        const btn = document.getElementById('btnDownload');
-        const el = document.getElementById('pdf-template');
-        const wrapper = document.getElementById('zoom-wrapper');
-        
-        const namaMentah = document.getElementById('nama').value || "Tanpa_Nama";
-        
-        // Penamaan File: Gelar menjadi kapital (contoh: S.pd menjadi S.Pd atau s.e menjadi S.E)
-        let namaFile = toTitleCase(namaMentah)
-            .replace(/\b([a-z])\.([a-z]{1,2})\b/gi, function(match, p1, p2) {
-                return p1.toUpperCase() + "." + p2.charAt(0).toUpperCase() + p2.slice(1);
-            })
-            .replace(/\s+/g, '_');
-        
-        // Bagian Penambahan Format Tanggal untuk Nama File
-        const tglInput = document.getElementById('tgl').value;
-        let tglFormatFile = "";
-        let hariFile = "Hari";
-        
-        if (tglInput) {
-            const dateObj = new Date(tglInput);
-            const daftarHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-            hariFile = daftarHari[dateObj.getDay()];
+            const tgl = formatTanggal(tglValue);
+            let alasanRaw = document.getElementById('alasan').value || "-";
+            const alasan = toTitleCase(alasanRaw);
+
+            const pesanTeks = `*SURAT IZIN GURU AZ-ZAHRO*\n\nNama: *${nama}*\nMapel: ${mapel}\nHari/Tgl: ${hari}, ${tgl}\nKeterangan: ${alasan}\n\n_Dikirim otomatis via Sistem Persuratan Lembaga Az-Zahro_`;
+
+            const currentTransform = wrapper.style.transform;
+            wrapper.style.transform = "scale(1)";
+            btn.disabled = true;
+            btn.innerText = "Memproses...";
+
+            try {
+                const opt = { margin: 0, filename: 'temp.pdf', image: { type: 'jpeg', quality: 0.95 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4' } };
+                const canvasImg = await html2pdf().set(opt).from(el).toCanvas().get('canvas');
+                
+                const blob = await new Promise(resolve => canvasImg.toBlob(resolve, 'image/png'));
+                const file = new File([blob], `Izin_${nama.replace(/\s+/g, '_')}.png`, { type: 'image/png' });
+
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({ files: [file], text: pesanTeks });
+                } else if (navigator.share) {
+                    await navigator.share({ title: 'Surat Izin Guru', text: pesanTeks });
+                } else {
+                    window.open(`https://wa.me/?text=${encodeURIComponent(pesanTeks)}`, '_blank');
+                }
+            } catch (err) {
+                window.open(`https://wa.me/?text=${encodeURIComponent(pesanTeks)}`, '_blank');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "BAGIKAN GAMBAR (WA)";
+                wrapper.style.transform = currentTransform;
+            }
+        }
+
+        async function downloadPDF() {
+            const btn = document.getElementById('btnDownload');
+            const el = document.getElementById('pdf-template');
+            const wrapper = document.getElementById('zoom-wrapper');
             
-            const d = dateObj.getDate();
-            const m = dateObj.toLocaleDateString('id-ID', { month: 'long' });
-            const y = dateObj.getFullYear();
-            tglFormatFile = `${d}_${m}_${y}`;
-        } else {
-            tglFormatFile = "Tanpa_Tanggal";
+            const namaMentah = document.getElementById('nama').value || "Tanpa_Nama";
+            let namaFile = toTitleCase(namaMentah)
+                .replace(/\b([a-z])\.([a-z]{1,2})\b/gi, function(match, p1, p2) {
+                    return p1.toUpperCase() + "." + p2.charAt(0).toUpperCase() + p2.slice(1);
+                })
+                .replace(/\s+/g, '_');
+            
+            const tglInput = document.getElementById('tgl').value;
+            let tglFormatFile = "";
+            let hariFile = "Hari";
+            
+            if (tglInput) {
+                const dateObj = new Date(tglInput);
+                const daftarHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+                hariFile = daftarHari[dateObj.getDay()];
+                
+                const d = dateObj.getDate();
+                const m = dateObj.toLocaleDateString('id-ID', { month: 'long' });
+                const y = dateObj.getFullYear();
+                tglFormatFile = `${d}_${m}_${y}`;
+            } else {
+                tglFormatFile = "Tanpa_Tanggal";
+            }
+
+            const currentTransform = wrapper.style.transform;
+            wrapper.style.transform = "scale(1)";
+            btn.disabled = true;
+            btn.innerText = "Sedang Mengunduh...";
+
+            await new Promise(r => setTimeout(r, 600));
+
+            const opt = {
+                margin: 0,
+                filename: `Surat_Izin_${namaFile}_${hariFile}_${tglFormatFile}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: 'avoid-all' }
+            };
+
+            html2pdf().set(opt).from(el).toPdf().get('pdf').then(function (pdf) {
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let i = totalPages; i > 1; i--) { pdf.deletePage(i); }
+            }).save().then(() => {
+                btn.disabled = false;
+                btn.innerText = "SIMPAN PDF";
+                wrapper.style.transform = currentTransform;
+                closePreview();
+            });
         }
+    </script>
 
-        const currentTransform = wrapper.style.transform;
-        wrapper.style.transform = "scale(1)";
-        btn.disabled = true;
-        btn.innerText = "Sedang Mengunduh...";
-
-        await new Promise(r => setTimeout(r, 600));
-
-        const opt = {
-            margin: 0,
-            filename: `Surat_Izin_${namaFile}_${hariFile}_${tglFormatFile}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: 'avoid-all' }
-        };
-
-        html2pdf().set(opt).from(el).toPdf().get('pdf').then(function (pdf) {
-            const totalPages = pdf.internal.getNumberOfPages();
-            for (let i = totalPages; i > 1; i--) { pdf.deletePage(i); }
-        }).save().then(() => {
-            btn.disabled = false;
-            btn.innerText = "SIMPAN PDF";
-            wrapper.style.transform = currentTransform;
-            closePreview();
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker sukses terdaftar!', reg))
+            .catch(err => console.log('Registrasi SW gagal:', err));
         });
-    }
-</script>
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('Service Worker terdaftar!', reg))
-        .catch(err => console.log('Registrasi SW gagal:', err));
-    });
-  }
-</script>
-    
+      }
+    </script>
 </body>
 </html>
