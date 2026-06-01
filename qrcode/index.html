@@ -202,7 +202,7 @@
                             </div>
                         </div>
 
-                        <a id="downloadBtn" class="w-full py-3.5 bg-gold-accent hover:bg-yellow-400 text-emerald-deep font-bold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-xl flex items-center justify-center gap-2 text-sm" href="#" target="_blank">
+                        <a id="downloadBtn" onclick="unduhQRCode()" class="w-full py-3.5 bg-gold-accent hover:bg-yellow-400 text-emerald-deep font-bold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-xl flex items-center justify-center gap-2 text-sm cursor-pointer" href="javascript:void(0);">
                             <i data-lucide="download" class="w-4 h-4"></i> Download File QR (PNG)
                         </a>
                     </div>
@@ -387,7 +387,6 @@
             
             const previewImg = document.getElementById('qrPreview');
             previewImg.src = apiUrl;
-            document.getElementById('downloadBtn').href = apiUrl;
             
             // Sembunyikan spinner loading dan munculkan wrapper hasil pratinjau
             document.getElementById('processingPreview').classList.add('hidden');
@@ -427,6 +426,53 @@
                 txt.innerText = "SMP ISLAM AZ-ZAHRO";
                 txt.style.display = "block";
             }
+        }
+
+        // Fungsi Baru untuk Mengunduh QR Code Langsung sebagai File PNG
+        function unduhQRCode() {
+            if (!urlApiAktif) {
+                alert("Silahkan buat QR Code terlebih dahulu!");
+                return;
+            }
+
+            const btnUnduh = document.getElementById('downloadBtn');
+            const textAwal = btnUnduh.innerHTML;
+            
+            // Berikan efek loading pada tombol download
+            btnUnduh.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4 animate-spin"></i> Mengunduh...';
+            lucide.createIcons();
+
+            fetch(urlApiAktif)
+                .then(response => {
+                    if (!response.ok) throw new Error('Gagal mengambil data gambar.');
+                    return response.blob();
+                })
+                .then(blob => {
+                    // Membuat URL temporer dari objek blob gambar
+                    const urlBlob = window.URL.createObjectURL(blob);
+                    const namaFile = "QRCode_AzZahro_" + Date.now() + ".png";
+                    
+                    // Membuat elemen <a> hantu untuk memicu proses download local browser
+                    const linkTrigger = document.createElement('a');
+                    linkTrigger.href = urlBlob;
+                    linkTrigger.download = namaFile;
+                    
+                    document.body.appendChild(linkTrigger);
+                    linkTrigger.click();
+                    
+                    // Bersihkan memori penampung link hantu
+                    document.body.removeChild(linkTrigger);
+                    window.URL.revokeObjectURL(urlBlob);
+                })
+                .catch(err => {
+                    console.error("Kesalahan saat mengunduh:", err);
+                    alert("Gagal mengunduh gambar secara langsung. Silakan klik kanan pada pratinjau gambar QR, lalu pilih 'Simpan Gambar'.");
+                })
+                .finally(() => {
+                    // Kembalikan teks asli tombol download
+                    btnUnduh.innerHTML = textAwal;
+                    lucide.createIcons();
+                });
         }
     </script>
 </body>
