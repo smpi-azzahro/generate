@@ -428,7 +428,7 @@
             }
         }
 
-        // Fungsi Baru untuk Mengunduh QR Code Langsung sebagai File PNG
+        // Fungsi Mengunduh QR Code Langsung sebagai File PNG dengan Format Nama Kustom Dinamis
         function unduhQRCode() {
             if (!urlApiAktif) {
                 alert("Silahkan buat QR Code terlebih dahulu!");
@@ -450,9 +450,20 @@
                 .then(blob => {
                     // Membuat URL temporer dari objek blob gambar
                     const urlBlob = window.URL.createObjectURL(blob);
-                    const namaFile = "QRCode_AzZahro_" + Date.now() + ".png";
                     
-                    // Membuat elemen <a> hantu untuk memicu proses download local browser
+                    // Mengambil data waktu aktual lokal komputer user
+                    const sekarang = new Date();
+                    const tanggal = String(sekarang.getDate()).padStart(2, '0');
+                    const bulan = String(sekarang.getMonth() + 1).padStart(2, '0');
+                    const tahun = sekarang.getFullYear();
+                    const jam = String(sekarang.getHours()).padStart(2, '0');
+                    const menit = String(sekarang.getMinutes()).padStart(2, '0');
+                    const detik = String(sekarang.getSeconds()).padStart(2, '0');
+
+                    // Menyusun nama file dinamis sesuai permintaan
+                    const namaFile = `Az_Zahro_QRCode_${tanggal}_${bulan}_${tahun}_${jam}_${menit}_${detik}.png`;
+                    
+                    // Membuat elemen <a> buatan untuk memicu proses download local browser
                     const linkTrigger = document.createElement('a');
                     linkTrigger.href = urlBlob;
                     linkTrigger.download = namaFile;
@@ -460,7 +471,7 @@
                     document.body.appendChild(linkTrigger);
                     linkTrigger.click();
                     
-                    // Bersihkan memori penampung link hantu
+                    // Bersihkan kembali elemen buatan setelah trigger klik selesai
                     document.body.removeChild(linkTrigger);
                     window.URL.revokeObjectURL(urlBlob);
                 })
